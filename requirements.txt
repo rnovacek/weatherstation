@@ -1,0 +1,8 @@
+# WebApp
+flask==0.12.2
+
+# Utilities
+adafruit-ampy==1.0.1
+
+# Requirements for running the sensor code on desktop
+requests==2.18.1

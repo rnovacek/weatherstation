@@ -1,0 +1,84 @@
+extends:
+  - airbnb-base
+  - plugin:react/recommended
+plugins:
+  - import
+  - react
+parser: "babel-eslint"
+parserOptions:
+  sourceType: "module"
+  ecmaVersion: 2017
+  ecmaFeatures:
+    jsx: true
+    modules: true
+    experimentalObjectRestSpread: true
+    impliedStrict: true
+env:
+  browser: true
+rules:
+  indent:
+    - error
+    - 4
+    - SwitchCase: 1
+  linebreak-style:
+    - 2
+    - unix
+  quotes:
+    - 0
+    - single
+  semi:
+    - 1
+    - always
+  comma-dangle:
+    - 2
+    - only-multiline
+  array-callback-return:
+    - 1
+  block-scoped-var:
+    - 2
+  consistent-return:
+    - 2
+  curly:
+    - 2
+  eqeqeq:
+    - 2
+  guard-for-in:
+    - 2
+  no-eq-null:
+    - 2
+  no-eval:
+    - 2
+  no-return-assign:
+    - 2
+  no-script-url:
+    - 2
+  no-self-assign:
+    - 2
+  no-self-compare:
+    - 2
+  no-sequences:
+    - 2
+  no-unmodified-loop-condition:
+    - 2
+  no-with:
+    - 2
+  no-unused-expressions:
+    - 2
+  no-shadow:
+    - 2
+  no-shadow-restricted-names:
+    - 2
+  no-undef:
+    - 2
+  no-use-before-define:
+    - 2
+  no-unused-vars:
+    - 1
+    - args: none
+  no-console:
+    - 0
+  no-debugger:
+    - 1
+  function-paren-newline:
+    - warn
+    - consistent
