@@ -26,7 +26,7 @@ from config import (
 )
 
 
-class Main:
+class Display:
     DISPLAY_WIDTH = 128
     DISPLAY_HEIGHT = 32
 
@@ -43,8 +43,6 @@ class Main:
 
         self.writer1 = Writer(self.oled1, dejavu)
         self.writer2 = Writer(self.oled2, dejavu)
-        
-        self.wlan = WLAN(STA_IF)
 
     def show_data(self, temperature, humidity):
         self.show_text(
@@ -64,15 +62,15 @@ class Main:
         self.oled1.show()
         self.oled2.show()
 
-    def show_error(self, text):
-        self.writer1.set_textpos(0, 0)
-        self.writer1.printstring('ERROR')
-        
-        self.writer2.set_textpos(0, 0)
-        self.writer2.printstring(text)
 
-        self.oled1.show()
-        self.oled2.show()
+class Main:
+    def __init__(self):
+        self.wlan = WLAN(STA_IF)
+        self.display = Display()
+        self.current_node = 1
+
+    def show_error(self, text):
+        self.display.show_text('ERROR', text)
 
     def connect(self):
         self.wlan.active(True)
@@ -105,32 +103,26 @@ class Main:
 
         deepsleep()
 
-
-if __name__ == '__main__':
-    button = Pin(WEMOS_MAPPING[BUTTON_PIN], Pin.IN, Pin.PULL_UP)
-
-    main = Main()
-    main.connect()
-
-    current_node = 1
-    
-    while True:
-        if not main.is_connected():
-            main.connect()
-            if not main.wait_for_connection():
-                main.show_error('WIFI')
-                continue
+    def run(self):
+        if not self.is_connected():
+            self.connect()
+            if not self.wait_for_connection():
+                self.show_error('WIFI')
+                return
 
         try:
             print('reading data')
-            data = main.read_data(current_node)
+            data = self.read_data(self.current_node)
             if data:
                 temp, humidity = data
                 print('data received: temp', temp, 'humidity', humidity)
-                main.show_data(temp, humidity)
+                self.display.show_data(temp, humidity)
         except OSError as e:
-            main.show_error(str(e))
+            self.show_error(str(e))
 
+        self.sleep_and_read_button()
+
+    def sleep_and_read_button(self):
         print('Going to sleep for', INTERVAL, 'seconds')
         slept_ms = 0
         while slept_ms < INTERVAL * 1000:
@@ -139,11 +131,23 @@ if __name__ == '__main__':
                 slept_ms += 10
                 if button.value() == 0:
                     print('button pressed')
-                    if current_node == 1:
-                        current_node = 2
+                    if self.current_node == 1:
+                        self.current_node = 2
                     else:
-                        current_node = 1
-                    main.show_text('SENSOR', str(current_node))
+                        self.current_node = 1
+                    self.display.show_text('SENSOR', str(self.current_node))
                     break
             sleep_ms(10)
             slept_ms += 10
+
+if __name__ == '__main__':
+    button = Pin(WEMOS_MAPPING[BUTTON_PIN], Pin.IN, Pin.PULL_UP)
+
+    main = Main()
+
+    while True:
+        try:
+            main.run()
+        except Exception as e:
+            print('Exception', e)
+            main.show_error('EXCEPTION')
