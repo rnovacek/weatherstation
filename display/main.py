@@ -110,15 +110,11 @@ class Main:
                 self.show_error('WIFI')
                 return
 
-        try:
-            print('reading data')
-            data = self.read_data(self.current_node)
-            if data:
-                temp, humidity = data
-                print('data received: temp', temp, 'humidity', humidity)
-                self.display.show_data(temp, humidity)
-        except OSError as e:
-            self.show_error(str(e))
+        print('reading data')
+        data = self.read_data(self.current_node)
+        temp, humidity = data
+        print('data received: temp', temp, 'humidity', humidity)
+        self.display.show_data(temp, humidity)
 
         self.sleep_and_read_button()
 
@@ -144,10 +140,16 @@ if __name__ == '__main__':
     button = Pin(WEMOS_MAPPING[BUTTON_PIN], Pin.IN, Pin.PULL_UP)
 
     main = Main()
+    main.display.show_text('Welcome', 'loading')
 
+    error_count = 0
     while True:
         try:
             main.run()
+            error_count = 0
         except Exception as e:
             print('Exception', e)
-            main.show_error('EXCEPTION')
+            sys.print_exception(e)
+            if error_count >= 5:
+                main.show_error('Exception')
+
