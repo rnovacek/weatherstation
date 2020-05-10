@@ -44,7 +44,7 @@ def serve(path):
 @app.route('/nodes')
 def nodes():
     db = get_db()
-    cur = db.execute('select distinct node from temperature')
+    cur = db.execute('select distinct node from record')
     nodes = [x['node'] for x in cur.fetchall()]
     return jsonify({'nodes': nodes})
 
@@ -53,8 +53,9 @@ def nodes():
 def temperature(node):
     db = get_db()
     cur = db.execute(
-        'select temperature, humidity, battery, strftime("%Y-%m-%dT%H:%M:%SZ", datetime) as dt '
-        'from temperature '
+        'select m.temperature, m.humidity, r.battery, strftime("%Y-%m-%dT%H:%M:%SZ", r.datetime) as dt '
+        'from measurement as m '
+        'inner join record as r on r.id = m.record '
         'where node = ? '
         'order by dt desc '
         'limit 1',
@@ -85,8 +86,8 @@ def history(node):
         '       avg(m.temperature) as temperature, '
         '       avg(m.humidity) as humidity, '
         '       avg(r.battery) as battery '
-        'from measurement as m'
-        'inner join record as r on r.id == m.record '
+        'from measurement as m '
+        'inner join record as r on r.id = m.record '
         'where r.node = ? and r.datetime >= ? and r.datetime <= ? '
         'group by dt '
         'order by dt asc',
@@ -108,7 +109,7 @@ def add_temperature(node):
     data = request.get_json()
     db = get_db()
     cursor = db.cursor()
-    db.execute(
+    cursor.execute(
         'insert into record '
         '(datetime, battery, sequence, node) values '
         '(datetime(), :battery, :sequence, :node)',
@@ -118,7 +119,7 @@ def add_temperature(node):
 
     for reading in data['readings']:
         reading['record'] = record_id
-        db.execute(
+        cursor.execute(
             'insert into measurement '
             '(record, sensor, temperature, humidity) values '
             '(:record, :name, :temperature, :humidity)',
