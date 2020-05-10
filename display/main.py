@@ -141,6 +141,7 @@ if __name__ == '__main__':
 
     main = Main()
     main.display.show_text('Welcome', 'loading')
+    main.connect()
 
     error_count = 0
     while True:

@@ -82,11 +82,12 @@ def history(node):
     db = get_db()
     cursor = db.execute(
         'select strftime("%Y-%m-%dT%H:%M:00Z", datetime) as dt, '
-        '       avg(temperature) as temperature, '
-        '       avg(humidity) as humidity, '
-        '       avg(battery) as battery '
-        'from temperature '
-        'where node = ? and datetime >= ? and datetime <= ? '
+        '       avg(m.temperature) as temperature, '
+        '       avg(m.humidity) as humidity, '
+        '       avg(r.battery) as battery '
+        'from measurement as m'
+        'inner join record as r on r.id == m.record '
+        'where r.node = ? and r.datetime >= ? and r.datetime <= ? '
         'group by dt '
         'order by dt asc',
         (node,
@@ -106,12 +107,25 @@ def history(node):
 def add_temperature(node):
     data = request.get_json()
     db = get_db()
+    cursor = db.cursor()
     db.execute(
-        'insert into temperature '
-        '(datetime, temperature, humidity, battery, sequence, node) values '
-        '(datetime(), :temperature, :humidity, :battery, :sequence, :node)',
-        data)
+        'insert into record '
+        '(datetime, battery, sequence, node) values '
+        '(datetime(), :battery, :sequence, :node)',
+        data,
+    )
+    record_id = cursor.lastrowid
+
+    for reading in data['readings']:
+        reading['record'] = record_id
+        db.execute(
+            'insert into measurement '
+            '(record, sensor, temperature, humidity) values '
+            '(:record, :name, :temperature, :humidity)',
+            reading,
+        )
     db.commit()
+
     return jsonify({'status': 'ok'})
 
 

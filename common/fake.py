@@ -18,6 +18,10 @@ def sleep_ms(ms):
     time.sleep(ms / 1000.0)
 
 
+def sleep_us(us):
+    time.sleep(ms / 1000000.0)
+
+
 def ticks_ms():
     return time.time() * 1000
 
@@ -56,6 +60,7 @@ def reset_cause():
 
 
 STA_IF = 0
+AP_IF = 1
 
 
 class WLAN:
@@ -141,3 +146,26 @@ class Writer:
 
 
 dejavu = 'dejavu'
+
+class OneWire:
+    def __init__(self, pin):
+        self.pin = pin
+
+    def reset(self):
+        pass
+
+
+class DS18X20:
+    DEVICE = b'1234'
+    def __init__(self, ow):
+        pass
+
+    def scan(self):
+        return [self.DEVICE]
+
+    def convert_temp(self):
+        pass
+
+    def read_temp(self, device):
+        assert device == self.DEVICE
+        return 25 + random.randint(-5, 5)

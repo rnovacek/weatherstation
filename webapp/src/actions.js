@@ -9,7 +9,7 @@ export const initialState = {
 };
 
 export function fetchNodes() {
-    return () => async dispatch => {
+    return () => async (dispatch) => {
         try {
             const nodes = await getNodes();
             dispatch(state => ({
@@ -29,7 +29,7 @@ export function fetchNodes() {
 }
 
 export function fetchHistory(node) {
-    return () => async dispatch => {
+    return () => async (dispatch) => {
         try {
             const history = await getHistory(node);
             dispatch(state => ({

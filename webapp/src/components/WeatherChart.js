@@ -19,7 +19,7 @@ const WeatherChart = ({ history }) => {
     let count = 0;
     let minDate = Math.round(Date.now() / binSize);
     let maxDate = minDate;
-    if (history) {
+    if (history && history.length > 0) {
         history.forEach(
             (entry) => {
                 const bin = Math.round(entry.datetime.valueOf() / binSize);
